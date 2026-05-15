@@ -675,6 +675,12 @@ class DOMRectReadOnly;
 
 }
 
+namespace Web::HTML::Parser {
+
+struct OpaqueEncodingDetector;
+
+}
+
 namespace Web::HTML {
 
 class AnimationFrameCallbackDriver;

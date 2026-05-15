@@ -5203,7 +5203,7 @@ GC::Ref<HTMLParser> HTMLParser::create_with_uncertain_encoding(DOM::Document& do
     auto scripting_mode = document.is_scripting_enabled() ? ParserScriptingMode::Normal : ParserScriptingMode::Disabled;
     if (document.has_encoding())
         return document.realm().create<HTMLParser>(document, scripting_mode, input, document.encoding().value().to_byte_string());
-    auto encoding = run_encoding_sniffing_algorithm(document, input, maybe_mime_type);
+    auto encoding = run_encoding_sniffing_algorithm(document, input, maybe_mime_type).encoding;
     dbgln_if(HTML_PARSER_DEBUG, "The encoding sniffing algorithm returned encoding '{}'", encoding);
     return document.realm().create<HTMLParser>(document, scripting_mode, input, encoding);
 }

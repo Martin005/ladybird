@@ -56,7 +56,7 @@ bool build_xml_document(DOM::Document& document, ByteBuffer const& data, Optiona
     if (content_encoding.has_value())
         decoder = TextCodec::decoder_for(*content_encoding);
     if (!decoder.has_value()) {
-        auto encoding = HTML::run_encoding_sniffing_algorithm(document, data);
+        auto encoding = HTML::run_encoding_sniffing_algorithm(document, data).encoding;
         decoder = TextCodec::decoder_for(encoding);
     }
     VERIFY(decoder.has_value());
@@ -176,7 +176,7 @@ static WebIDL::ExceptionOr<GC::Ref<DOM::Document>> load_xml_document(HTML::Navig
         if (content_encoding.has_value())
             decoder = TextCodec::decoder_for(*content_encoding);
         if (!decoder.has_value()) {
-            auto encoding = HTML::run_encoding_sniffing_algorithm(document, data, mime);
+            auto encoding = HTML::run_encoding_sniffing_algorithm(document, data, mime).encoding;
             decoder = TextCodec::decoder_for(encoding);
         }
         VERIFY(decoder.has_value());
@@ -258,7 +258,8 @@ static WebIDL::ExceptionOr<GC::Ref<DOM::Document>> load_text_document(HTML::Navi
     //    load event to be fired.
     // FIXME: Parse as we receive the document data, instead of waiting for the whole document to be fetched first.
     auto process_body = GC::create_function(document->heap(), [document, url = navigation_params.response->url().value(), mime = type](ByteBuffer data) {
-        auto encoding = run_encoding_sniffing_algorithm(document, data, mime);
+        auto sniff_result = run_encoding_sniffing_algorithm(document, data, mime);
+        auto encoding = sniff_result.encoding;
         dbgln_if(HTML_PARSER_DEBUG, "The encoding sniffing algorithm returned encoding '{}'", encoding);
 
         auto run_text_parser = [document, data = move(data), url, encoding = move(encoding)] {
