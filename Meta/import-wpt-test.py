@@ -359,7 +359,10 @@ def main():
     resource_path = "/".join(Path(url_to_import).parts[2::])
 
     with urlopen(url_to_import) as response:
-        page = response.read().decode("utf-8")
+        # Some WPT test files (e.g. `encoding-detection` tests) are intentionally stored in a
+        # legacy encoding rather than UTF-8. We only parse the ASCII tag structure here, so
+        # replacing undecodable bytes with U+FFFD is safe and avoids a UnicodeDecodeError.
+        page = response.read().decode("utf-8", errors="replace")
 
     global test_type, reference_path, raw_reference_path
     if is_crash_test(url_to_import):
@@ -407,7 +410,10 @@ def main():
     expected_parser = LinkedResourceFinder()
     for path in main_paths[1:]:
         with urlopen(path.source) as response:
-            page = response.read().decode("utf-8")
+            # Some WPT test files (e.g. `encoding-detection` tests) are intentionally stored in a
+            # legacy encoding rather than UTF-8. We only parse the ASCII tag structure here, so
+            # replacing undecodable bytes with U+FFFD is safe and avoids a UnicodeDecodeError.
+            page = response.read().decode("utf-8", errors="replace")
             expected_parser.feed(page)
     additional_resources.extend(
         list(map(lambda s: ResourceAndType(s, ResourceType.EXPECTED), expected_parser.resources))
